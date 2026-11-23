@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">◉</span>
+    <div>
+      <h1>Token Radar</h1>
+      <p class="tagline">Every protocol with no token yet, ranked by what its launch would be worth.</p>
+    </div>
+  </div>
+  <dl class="headline" id="headline"></dl>
+</header>
+<nav class="views" aria-label="Views">
+  <button type="button" data-view="board" class="view-btn active">Board</button>
+  <button type="button" data-view="live" class="view-btn">Already trading</button>
+  <button type="button" data-view="method" class="view-btn">How the ranking works</button>
+</nav>
+<section class="controls" id="controls" aria-label="Board filters">
+  <label class="ctl">Search
+    <input type="search" id="q" placeholder="Protocol name or slug" autocomplete="off">
+  </label>
+  <label class="ctl">Category
+    <select id="category"><option value="">All categories</option></select>
+  </label>
+  <label class="ctl">Chain
+    <select id="chain"><option value="">All chains</option></select>
+  </label>
+  <label class="ctl">TVL at least
+    <select id="minTvl">
+      <option value="0">Any size</option>
+      <option value="5000000">$5M</option>
+      <option value="50000000">$50M</option>
+      <option value="100000000">$100M</option>
+      <option value="500000000">$500M</option>
+    </select>
+  </label>
+  <label class="ctl check"><input type="checkbox" id="watchlistOnly"> Watchlist only</label>
+  <label class="ctl">Sort by
+    <select id="sort">
+      <option value="rank">Rank</option>
+      <option value="implied">Implied value</option>
+      <option value="tvl">TVL</option>
+      <option value="growth">7-day change</option>
+      <option value="age">Age</option>
+    </select>
+  </label>
+  <p class="count" id="count" aria-live="polite"></p>
+</section>
+<main id="main">
+  <section id="boardView">
+    <p class="note">Implied value is this radar's own claim, worked out from the snapshot's
+    figures — it is not a prediction that a token will be issued, or when.
+    “Records no token” means DefiLlama's record carries none; a protocol on
+    this board may still have a token its record does not carry.</p>
+    <div class="table-wrap">
+      <table id="board">
+        <thead>
+          <tr>
+            <th data-sort="rank">#</th>
+            <th data-sort="name">Protocol</th>
+            <th data-sort="category">Category</th>
+            <th data-sort="tvl">TVL</th>
+            <th data-sort="growth">7d</th>
+            <th data-sort="age">Age</th>
+            <th data-sort="implied">Implied value</th>
+            <th>Farm plan</th>
+          </tr>
+        </thead>
+        <tbody id="boardBody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="boardEmpty" hidden>No protocol matches these filters. Loosen one and try again.</p>
+  </section>
+  <section id="detailView" hidden></section>
+  <section id="liveView" hidden>
+    <p class="note">These protocols already have a token that trades, so they are not
+    ranked — they are the market the ranking is fitted on. Each row's
+    market-cap-to-TVL ratio is one of the numbers the category multiples
+    below are medians of.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Protocol</th><th>Category</th><th>TVL</th><th>Market cap</th><th>Mcap / TVL</th><th>7d</th></tr></thead>
+        <tbody id="liveBody"></tbody>
+      </table>
+    </div>
+  </section>
+  <section id="methodView" hidden>
+    <h2>How the ranking works</h2>
+    <p>The board is built from one sealed snapshot of every protocol DefiLlama
+    tracks, fetched once and frozen. Nothing here is typed in by hand: the
+    same function scores every protocol, and the numbers below are the ones
+    it was fitted on.</p>
+    <h3>The formula</h3>
+    <p class="formula">implied value = TVL × category multiple × growth multiplier × maturity multiplier</p>
+    <ul class="method-list">
+      <li><strong>Category multiple.</strong> For each category, the median
+      market-cap-to-TVL ratio of its live-token protocols, shrunk toward the
+      market-wide median with a prior of 5 protocols, so a category with one
+      or two live comps cannot decide a ranking on its own. Ratios are
+      winsorised at their 90th percentile first: a small protocol whose token
+      trades at hundreds of times its TVL is a quirk of its size, not a
+      category's going rate.</li>
+      <li><strong>Growth multiplier.</strong> 1 + (seven-day TVL change, clamped
+      to −50%…+100%) × 0.4. A protocol growing fast is worth more than one
+      shrinking at the same size.</li>
+      <li><strong>Maturity multiplier.</strong> 0.75 + 0.25 × (days listed, capped
+      at 1,095) ÷ 1,095. A protocol that has run for years with no token has
+      had longer to build the user base a launch would be priced on.</li>
+    </ul>
+    <h3>Category multiples the model was fitted on</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Live comps</th><th>Median mcap / TVL</th><th>Multiple applied</th></tr></thead>
+        <tbody id="calibBody"></tbody>
+      </table>
+    </div>
+    <h3>What the board covers</h3>
+    <p id="coverageText"></p>
+    <h3>What this radar does not claim</h3>
+    <ul class="method-list">
+      <li>It does not predict whether or when a protocol issues a token.</li>
+      <li>A protocol “records no token” when DefiLlama's record carries no
+      market cap, CoinGecko id or symbol — that is a fact about the record,
+      not proof the protocol has no token.</li>
+      <li>Farm steps are a starting plan, not advice: check the protocol's
+      own pages before you move money, and never pay anyone to claim for you.</li>
+    </ul>
+  </section>
+</main>
+<footer>
+  <p id="sourceLine"></p>
+  <p>Token Radar · model radar-2 · built from a sealed DefiLlama snapshot. The board is the entry's own claim, never make.fun's.</p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
