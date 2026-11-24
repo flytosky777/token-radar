@@ -392,7 +392,7 @@ function actionFor(p: SnapshotProtocol, capital: number, chain: string): string 
   if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) {
     return `Lend $${capital} of USDC on ${name} (${chain}) and leave the deposit earning.`;
   }
-  if (c.includes('dex') || c.includes('amm')) {
+  if ((c.includes('dex') || c.includes('amm')) && !c.includes('index')) {
     return `Add $${capital} of liquidity to ${name}'s deepest pool on ${chain} and hold the LP tokens.`;
   }
   if (c.includes('yield')) {
@@ -419,10 +419,158 @@ function actionFor(p: SnapshotProtocol, capital: number, chain: string): string 
   if (c.includes('insurance')) {
     return `Buy $${capital} of cover from ${name} on ${chain} and keep the policy active.`;
   }
+  if (c.includes('index')) {
+    return `Buy $${capital} of the ${name} index on ${chain} and hold the index tokens.`;
+  }
   if (c.includes('curator') || c.includes('allocator') || c.includes('vault')) {
     return `Deposit $${capital} into a ${name} vault on ${chain} and keep the vault shares.`;
   }
   return `Deposit $${capital} of USDC into ${name} on ${chain} and use its main feature once.`;
+}
+
+/**
+ * The week's qualifying action, written for the protocol's own category:
+ * a lender's week is repaying and re-borrowing, a DEX's week is swapping
+ * and collecting fees, a vault's week is harvesting and compounding. The
+ * action is derived from the category, the chains and the capital, never
+ * from a hand-written list of names.
+ */
+function weeklyActionFor(p: SnapshotProtocol, capital: number, chain: string): FarmStep {
+  const c = (p.category ?? '').toLowerCase();
+  const name = p.name;
+  const gas = { cost: 'about $2 of gas a week', time: '10 minutes a week' };
+  if (c.includes('curator') || c.includes('allocator')) {
+    return {
+      text: `Once a week, move a small slice of your deposit between the vaults ${name} curates on ${chain}, and claim any points the curator publishes for active allocators.`,
+      ...gas,
+    };
+  }
+  if (c.includes('yield aggregator') || c.includes('yield')) {
+    return {
+      text: `Once a week, harvest the yield your ${name} vault earned on ${chain} and deposit it straight back into the same vault, so the position compounds instead of sitting idle.`,
+      ...gas,
+    };
+  }
+  if ((c.includes('dex') || c.includes('amm')) && !c.includes('index')) {
+    return {
+      text: `Once a week, swap a small amount through ${name}'s deepest pool on ${chain} and collect the trading fees your liquidity position earned.`,
+      ...gas,
+    };
+  }
+  if (c.includes('liquidity manager')) {
+    return {
+      text: `Once a week, rebalance your ${name} position on ${chain}: move the range to where the pool is actually trading and collect the fees it earned.`,
+      ...gas,
+    };
+  }
+  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) {
+    return {
+      text: `Once a week, repay a small slice of the loan on ${name} and borrow it back, and top up the collateral if the health factor slipped.`,
+      ...gas,
+    };
+  }
+  if (c.includes('rwa') || c.includes('real world')) {
+    return {
+      text: `Once a week, mint or redeem a small amount of ${name}'s yield-bearing token on ${chain} and claim the yield it paid out.`,
+      ...gas,
+    };
+  }
+  if (c.includes('basis')) {
+    return {
+      text: `Once a week, roll one small basis trade on ${name}: close the expiring leg and open the next, so the position stays open without a gap.`,
+      ...gas,
+    };
+  }
+  if (c.includes('perpetual') || c.includes('derivative') || c.includes('options')) {
+    return {
+      text: `Once a week, open and close one small hedged position on ${name} and roll it before funding eats the edge.`,
+      ...gas,
+    };
+  }
+  if (c.includes('stak')) {
+    return {
+      text: `Once a week, restake the rewards ${name} paid out on ${chain}, so the stake compounds, and keep the receipt token in the same wallet.`,
+      ...gas,
+    };
+  }
+  if (c.includes('bridge')) {
+    return {
+      text: `Once a week, bridge a small amount back or forth with ${name}, so the wallet shows crossings in both directions rather than one exit.`,
+      cost: 'about $5 of gas a week',
+      time: '10 minutes a week',
+    };
+  }
+  if (c.includes('prediction') || c.includes('betting')) {
+    return {
+      text: `Once a week, take one small position in a fresh market on ${name} and settle the ones that already closed.`,
+      ...gas,
+    };
+  }
+  if (c.includes('stable')) {
+    return {
+      text: `Once a week, mint or redeem a small amount of ${name}'s stable asset on ${chain} and swap a little between its paired tokens.`,
+      ...gas,
+    };
+  }
+  if (c.includes('insurance')) {
+    return {
+      text: `Once a week, extend your ${name} cover by a small amount on ${chain} and check the claims page for any payout you are owed.`,
+      ...gas,
+    };
+  }
+  if (c.includes('chain') && !c.includes('cross')) {
+    return {
+      text: `Once a week, make one small transaction on ${chain} itself, a transfer, a stake or one use of an app built on it, so the wallet shows steady use of the chain.`,
+      cost: 'about $1 of gas a week',
+      time: '10 minutes a week',
+    };
+  }
+  if (c.includes('farm') || c.includes('leveraged')) {
+    return {
+      text: `Once a week, harvest the farm's rewards on ${name} and put half of them back into the same position on ${chain}.`,
+      ...gas,
+    };
+  }
+  if (c.includes('governance')) {
+    return {
+      text: `Once a week, vote on one open proposal through ${name} and claim any incentives the vote earned.`,
+      ...gas,
+    };
+  }
+  if (c.includes('index')) {
+    return {
+      text: `Once a week, buy or rebalance a small amount of the ${name} index on ${chain}, so the position tracks the index instead of drifting.`,
+      ...gas,
+    };
+  }
+  if (c.includes('payment') || c.includes('card')) {
+    return {
+      text: `Once a week, make one small payment with ${name} and top the card up from the farm wallet.`,
+      ...gas,
+    };
+  }
+  if (c.includes('otc')) {
+    return {
+      text: `Once a week, place one small order on ${name}'s OTC desk and fill a quote if the price is fair.`,
+      ...gas,
+    };
+  }
+  if (c.includes('cedefi')) {
+    return {
+      text: `Once a week, deposit or withdraw a small amount through ${name} and check the yield it reports for the position.`,
+      ...gas,
+    };
+  }
+  if (c.includes('anchor') || c.includes('decentralized btc')) {
+    return {
+      text: `Once a week, mint or redeem a small amount of the BTC-backed asset on ${name} and keep it in the farm wallet.`,
+      ...gas,
+    };
+  }
+  return {
+    text: `Once a week, use ${name}'s main feature on ${chain} with a small amount, so the wallet shows steady use rather than a single burst.`,
+    ...gas,
+  };
 }
 
 /**
@@ -446,11 +594,7 @@ export function farmSteps(p: SnapshotProtocol, age: number | null): FarmStep[] {
       cost: `$${capital} of capital and about $${capital >= 200 ? 10 : 5} of gas`,
       time: '15 minutes to set up',
     },
-    {
-      text: `Do one small qualifying action every week, a swap, a deposit, a vote or a claim, so the wallet shows steady use rather than a single burst.`,
-      cost: 'about $2 of gas a week',
-      time: '10 minutes a week',
-    },
+    weeklyActionFor(p, capital, chain),
     {
       text: `Keep the position open for at least ${hold} days so the activity is counted in more than one snapshot.`,
       cost: `the $${capital} stays in the position`,
