@@ -26,7 +26,10 @@ implied value = TVL × category multiple × growth multiplier × maturity multip
 
 The board ranks all 198 rankable pre-token protocols: the 40 on the
 snapshot's watchlist, plus 158 more the watchlist leaves out. Every row
-carries a six-step farm plan with costs and times. The 24 largest
+carries a six-step farm plan with costs and times, and the plan's weekly
+qualifying action is written for the protocol's own category — a lender's
+week is repaying and re-borrowing, a DEX's week is swapping and
+collecting fees, a vault's week is harvesting and compounding. The 24 largest
 live-token protocols are shown separately, as the market the model is
 fitted on — never ranked as if they were still to come.
 
